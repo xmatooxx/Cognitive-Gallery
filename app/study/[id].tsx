@@ -3,14 +3,15 @@ import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useContext, useMemo, useRef, useState } from "react";
 import {
+  Alert,
   Animated,
   Dimensions,
-  SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { DeckContext } from "../../components/DeckContext";
 
 interface FlashCard {
@@ -58,6 +59,16 @@ export default function StudyScreen() {
   const flipAnim = useRef(new Animated.Value(0)).current;
   const cardFlashAnim = useRef(new Animated.Value(0)).current;
   const contentOpacityAnim = useRef(new Animated.Value(1)).current;
+
+  const rotateYFront = flipAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", "180deg"],
+  });
+
+  const rotateYBack = flipAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["-180deg", "0deg"],
+  });
 
   const buttonScaleRef = useRef({
     "very-hard": new Animated.Value(1),
@@ -168,7 +179,23 @@ export default function StudyScreen() {
   };
 
   const handleClose = () => {
-    router.back();
+    Alert.alert(
+      "Przerwij naukę",
+      "Czy na pewno chcesz przerwać obecną sesję nauki? Twój postęp w tej sesji nie zostanie zapisany.",
+      [
+        { text: "Anuluj", style: "cancel" },
+        {
+          text: "Przerwij",
+          style: "destructive",
+          onPress: () => {
+            setCurrentCardIndex(0);
+            setIsFlipped(false);
+            flipAnim.setValue(0);
+            router.replace("/(tabs)/library");
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -204,90 +231,122 @@ export default function StudyScreen() {
 
       {/* Card Section */}
       <View style={styles.cardSection}>
-        <Animated.View
-          style={[
-            styles.card,
-            {
-              opacity: cardFlashAnim.interpolate({
-                inputRange: [0, 0.5, 1],
-                outputRange: [1, 0.7, 1],
-              }),
-            },
-          ]}
-        >
-          {/* Flash overlay */}
-          {lastDifficultyColor && (
-            <Animated.View
-              style={[
-                styles.cardFlashOverlay,
-                {
-                  backgroundColor: lastDifficultyColor,
-                  opacity: cardFlashAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, 0.6],
-                  }),
-                },
-              ]}
-            />
-          )}
-
-          <TouchableOpacity
-            style={styles.cardTouchable}
-            onPress={handleFlipCard}
-            activeOpacity={1}
+        <View style={styles.cardContainer}>
+          {/* Front Card */}
+          <Animated.View
+            style={[
+              styles.card,
+              {
+                opacity: flipAnim.interpolate({
+                  inputRange: [0, 0.5, 0.5, 1],
+                  outputRange: [1, 1, 0, 0],
+                }),
+                transform: [{ rotateY: rotateYFront }],
+              },
+            ]}
+            pointerEvents={isFlipped ? "none" : "auto"}
           >
-            {/* Opakowaliśmy zawartość karty (bez nakładki flash) w Animated.View, żeby całość płynnie gasła */}
-            <Animated.View style={{ flex: 1, opacity: contentOpacityAnim }}>
-              <View style={styles.cardCategory}>
-                <Text style={styles.categoryText}>ARCHITECTURE & DESIGN</Text>
-                <Ionicons
-                  name="information-circle-outline"
-                  size={16}
-                  color="#999"
-                />
-              </View>
+            {/* Flash overlay */}
+            {lastDifficultyColor && (
+              <Animated.View
+                style={[
+                  styles.cardFlashOverlay,
+                  {
+                    backgroundColor: lastDifficultyColor,
+                    opacity: cardFlashAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, 0.6],
+                    }),
+                  },
+                ]}
+              />
+            )}
 
-              <View style={styles.textContentContainer}>
-                {/* Front side (Question) */}
-                <Animated.View
-                  style={[
-                    styles.faceContainer,
-                    {
-                      opacity: flipAnim.interpolate({
-                        inputRange: [0, 0.5, 1],
-                        outputRange: [1, 0, 0],
-                      }),
-                    },
-                  ]}
-                  pointerEvents={isFlipped ? "none" : "auto"}
-                >
+            <TouchableOpacity
+              style={styles.cardTouchable}
+              onPress={handleFlipCard}
+              activeOpacity={1}
+            >
+              <Animated.View style={{ flex: 1, opacity: contentOpacityAnim }}>
+                <View style={styles.cardCategory}>
+                  <Text style={styles.categoryText}>ARCHITECTURE & DESIGN</Text>
+                  <Ionicons
+                    name="information-circle-outline"
+                    size={16}
+                    color="#999"
+                  />
+                </View>
+
+                <View style={styles.textContentContainer}>
                   <Text style={styles.cardContent}>{currentCard.question}</Text>
-                </Animated.View>
+                </View>
 
-                {/* Back side (Answer) */}
-                <Animated.View
-                  style={[
-                    styles.faceContainer,
-                    {
-                      opacity: flipAnim.interpolate({
-                        inputRange: [0, 0.5, 1],
-                        outputRange: [0, 0, 1],
-                      }),
-                    },
-                  ]}
-                  pointerEvents={isFlipped ? "auto" : "none"}
-                >
+                <View style={styles.cardFooter}>
+                  <Ionicons name="hand-left-outline" size={16} color="#999" />
+                  <Text style={styles.flipHint}>Tap to reveal answer</Text>
+                </View>
+              </Animated.View>
+            </TouchableOpacity>
+          </Animated.View>
+
+          {/* Back Card */}
+          <Animated.View
+            style={[
+              styles.card,
+              styles.cardBack,
+              {
+                opacity: flipAnim.interpolate({
+                  inputRange: [0, 0.5, 0.5, 1],
+                  outputRange: [0, 0, 1, 1],
+                }),
+                transform: [{ rotateY: rotateYBack }],
+              },
+            ]}
+            pointerEvents={isFlipped ? "auto" : "none"}
+          >
+            {/* Flash overlay */}
+            {lastDifficultyColor && (
+              <Animated.View
+                style={[
+                  styles.cardFlashOverlay,
+                  {
+                    backgroundColor: lastDifficultyColor,
+                    opacity: cardFlashAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, 0.6],
+                    }),
+                  },
+                ]}
+              />
+            )}
+
+            <TouchableOpacity
+              style={styles.cardTouchable}
+              onPress={handleFlipCard}
+              activeOpacity={1}
+            >
+              <Animated.View style={{ flex: 1, opacity: contentOpacityAnim }}>
+                <View style={styles.cardCategory}>
+                  <Text style={styles.categoryText}>ARCHITECTURE & DESIGN</Text>
+                  <Ionicons
+                    name="information-circle-outline"
+                    size={16}
+                    color="#999"
+                  />
+                </View>
+
+                <View style={styles.textContentContainer}>
                   <Text style={styles.cardContent}>{currentCard.answer}</Text>
-                </Animated.View>
-              </View>
+                </View>
 
-              <View style={styles.cardFooter}>
-                <Ionicons name="hand-left-outline" size={16} color="#999" />
-                <Text style={styles.flipHint}>Tap to reveal answer</Text>
-              </View>
-            </Animated.View>
-          </TouchableOpacity>
-        </Animated.View>
+                <View style={styles.cardFooter}>
+                  <Ionicons name="hand-left-outline" size={16} color="#999" />
+                  <Text style={styles.flipHint}>Tap to return to question</Text>
+                </View>
+              </Animated.View>
+            </TouchableOpacity>
+          </Animated.View>
+        </View>
 
         <Animated.Text
           style={[styles.cardCounter, { opacity: contentOpacityAnim }]}
@@ -398,7 +457,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   progressText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: "700",
     color: "#4caf50",
     letterSpacing: 0.5,
@@ -432,6 +491,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 5,
+    backfaceVisibility: "hidden",
+  },
+  cardContainer: {
+    width: CARD_WIDTH,
+    minHeight: 320,
+  },
+  cardBack: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
   cardTouchable: {
     flex: 1,
@@ -448,7 +519,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   categoryText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: "700",
     color: "#999",
     letterSpacing: 0.5,
@@ -459,6 +530,7 @@ const styles = StyleSheet.create({
   },
   faceContainer: {
     ...StyleSheet.absoluteFillObject,
+    backfaceVisibility: "hidden",
   },
   cardContent: {
     fontSize: 20,
@@ -476,12 +548,12 @@ const styles = StyleSheet.create({
     borderTopColor: "#e0e0e0",
   },
   flipHint: {
-    fontSize: 12,
+    fontSize: 13,
     color: "#999",
   },
   cardCounter: {
     marginTop: 16,
-    fontSize: 12,
+    fontSize: 13,
     color: "#999",
     textAlign: "center",
   },
@@ -504,7 +576,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   difficultyButtonText: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "700",
     color: "#000",
   },

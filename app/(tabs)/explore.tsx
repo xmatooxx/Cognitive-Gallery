@@ -3,7 +3,6 @@ import { useRouter } from "expo-router";
 import { useContext, useMemo, useState } from "react";
 import {
   Alert,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -11,6 +10,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useTabSwipe } from "../../components/useTabSwipe";
 import { Card, DeckContext } from "../../components/DeckContext";
 
 interface PublicDeck {
@@ -208,9 +209,34 @@ const PUBLIC_LIBRARY: PublicDeck[] = [
 
 export default function ExploreScreen() {
   const router = useRouter();
+  const swipeHandlers = useTabSwipe("explore");
   const context = useContext(DeckContext);
   const [selectedCategory, setSelectedCategory] = useState("All Topics");
   const [searchQuery, setSearchQuery] = useState("");
+
+  // --- LOGIKA WYSZUKIWANIA I FILTROWANIA ---
+
+  const filteredTrendingDecks = useMemo(() => {
+    return TRENDING_DECKS.filter((deck) => {
+      const matchesSearch =
+        deck.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        deck.author.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory =
+        selectedCategory === "All Topics" || deck.category === selectedCategory;
+      return matchesSearch && matchesCategory;
+    });
+  }, [searchQuery, selectedCategory]);
+
+  const filteredPublicLibrary = useMemo(() => {
+    return PUBLIC_LIBRARY.filter((deck) => {
+      const matchesSearch =
+        deck.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        deck.author.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory =
+        selectedCategory === "All Topics" || deck.category === selectedCategory;
+      return matchesSearch && matchesCategory;
+    });
+  }, [searchQuery, selectedCategory]);
 
   if (!context) {
     return null;
@@ -249,30 +275,6 @@ export default function ExploreScreen() {
       );
     }
   };
-
-  // --- LOGIKA WYSZUKIWANIA I FILTROWANIA ---
-
-  const filteredTrendingDecks = useMemo(() => {
-    return TRENDING_DECKS.filter((deck) => {
-      const matchesSearch =
-        deck.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        deck.author.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory =
-        selectedCategory === "All Topics" || deck.category === selectedCategory;
-      return matchesSearch && matchesCategory;
-    });
-  }, [searchQuery, selectedCategory]);
-
-  const filteredPublicLibrary = useMemo(() => {
-    return PUBLIC_LIBRARY.filter((deck) => {
-      const matchesSearch =
-        deck.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        deck.author.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory =
-        selectedCategory === "All Topics" || deck.category === selectedCategory;
-      return matchesSearch && matchesCategory;
-    });
-  }, [searchQuery, selectedCategory]);
 
   // --- KOMPONENTY KART ---
 
@@ -345,7 +347,7 @@ export default function ExploreScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} {...swipeHandlers}>
       <ScrollView
         scrollEnabled={true}
         showsVerticalScrollIndicator={false}
@@ -502,7 +504,7 @@ const styles = StyleSheet.create({
     borderColor: "#000",
   },
   categoryText: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "600",
     color: "#666",
   },
@@ -524,13 +526,13 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   sectionSubtitle: {
-    fontSize: 11,
+    fontSize: 12,
     color: "#999",
     fontWeight: "600",
     letterSpacing: 1,
   },
   filterText: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "600",
     color: "#000",
   },
@@ -561,7 +563,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   badgeText: {
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: "700",
     color: "#fff",
     letterSpacing: 0.5,

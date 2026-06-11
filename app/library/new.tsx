@@ -2,7 +2,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useContext, useEffect, useState } from "react";
 import {
-    SafeAreaView,
     ScrollView,
     StyleSheet,
     Switch,
@@ -11,6 +10,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { DeckContext } from "../../components/DeckContext";
 
 export default function NewDeckScreen() {
@@ -20,11 +20,7 @@ export default function NewDeckScreen() {
   const [description, setDescription] = useState("");
   const [isPublic, setIsPublic] = useState(false);
 
-  if (!context) {
-    return null;
-  }
-
-  const { draftDeck, setDraftDeck, addDeck, clearDraftDeck } = context;
+  const draftDeck = context?.draftDeck;
 
   useEffect(() => {
     if (draftDeck) {
@@ -33,6 +29,12 @@ export default function NewDeckScreen() {
       setIsPublic(draftDeck.isPublic);
     }
   }, [draftDeck]);
+
+  if (!context) {
+    return null;
+  }
+
+  const { setDraftDeck, addDeck, clearDraftDeck } = context;
 
   const isFormValid = title.trim().length > 0;
   const canSave = Boolean(draftDeck?.cards.length && isFormValid);
@@ -194,7 +196,7 @@ const styles = StyleSheet.create({
     paddingVertical: 24,
   },
   badge: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: "700",
     color: "#999",
     letterSpacing: 0.5,
@@ -247,7 +249,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   toggleDescription: {
-    fontSize: 12,
+    fontSize: 13,
     color: "#999",
   },
   addTermsButton: {

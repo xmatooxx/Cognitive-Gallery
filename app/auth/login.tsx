@@ -13,13 +13,41 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [emailHasError, setEmailHasError] = useState(false);
+  const [passwordHasError, setPasswordHasError] = useState(false);
 
   const handleLogin = () => {
-    if (!email.trim() || !password.trim()) {
-      setErrorMessage("Błędne dane logowania");
+    if (!email.trim()) {
+      setErrorMessage("Adres e-mail jest wymagany.");
+      setEmailHasError(true);
+      setPasswordHasError(false);
       return;
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      setErrorMessage("Niepoprawny format adresu e-mail.");
+      setEmailHasError(true);
+      setPasswordHasError(false);
+      return;
+    }
+
+    if (!password.trim()) {
+      setErrorMessage("Hasło jest wymagane.");
+      setEmailHasError(false);
+      setPasswordHasError(true);
+      return;
+    }
+
+    if (password.length < 6) {
+      setErrorMessage("Hasło musi mieć co najmniej 6 znaków.");
+      setEmailHasError(false);
+      setPasswordHasError(true);
+      return;
+    }
+
+    setEmailHasError(false);
+    setPasswordHasError(false);
     setErrorMessage("");
     router.replace("/(tabs)/library");
   };
@@ -43,7 +71,7 @@ export default function LoginScreen() {
           <TextInput
             style={[
               styles.input,
-              errorMessage && !email.trim() ? styles.inputError : null,
+              emailHasError ? styles.inputError : null,
             ]}
             placeholder="you@gallery.com"
             placeholderTextColor="#ccc"
@@ -51,6 +79,7 @@ export default function LoginScreen() {
             onChangeText={(text) => {
               setEmail(text);
               setErrorMessage("");
+              setEmailHasError(false);
             }}
             keyboardType="email-address"
             autoCapitalize="none"
@@ -60,7 +89,7 @@ export default function LoginScreen() {
           <TextInput
             style={[
               styles.input,
-              errorMessage && !password.trim() ? styles.inputError : null,
+              passwordHasError ? styles.inputError : null,
             ]}
             placeholder="••••••••"
             placeholderTextColor="#ccc"
@@ -68,6 +97,7 @@ export default function LoginScreen() {
             onChangeText={(text) => {
               setPassword(text);
               setErrorMessage("");
+              setPasswordHasError(false);
             }}
             secureTextEntry
           />
@@ -135,7 +165,7 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   label: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "600",
     color: "#666",
     marginBottom: 8,
@@ -160,7 +190,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
   },
   forgotText: {
-    fontSize: 12,
+    fontSize: 13,
     color: "#999",
     fontWeight: "500",
   },

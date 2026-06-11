@@ -4,12 +4,12 @@ import { useContext } from "react";
 import {
   Alert,
   FlatList,
-  SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { DeckContext } from "../../components/DeckContext";
 
 export default function DeckDetailScreen() {
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   badgeText: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "700",
     color: "#4caf50",
     letterSpacing: 0.5,
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   statLabel: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: "600",
     color: "#999",
     letterSpacing: 0.5,
@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   sortText: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "600",
     color: "#666",
   },
@@ -302,7 +302,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   definition: {
-    fontSize: 12,
+    fontSize: 13,
     color: "#666",
     lineHeight: 16,
   },

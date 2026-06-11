@@ -3,17 +3,19 @@ import { useRouter } from "expo-router";
 import { useContext } from "react";
 import {
     FlatList,
-    SafeAreaView,
     StyleSheet,
     Text,
     TouchableOpacity,
     View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useTabSwipe } from "../../components/useTabSwipe";
 import { Deck, DeckContext } from "../../components/DeckContext";
 
 export default function LibraryScreen() {
   const router = useRouter();
   const context = useContext(DeckContext);
+  const swipeHandlers = useTabSwipe("library");
 
   if (!context) {
     return null;
@@ -87,12 +89,12 @@ export default function LibraryScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} {...swipeHandlers}>
       <View style={styles.header}>
         <Text style={styles.statsValue}>{Math.round(weeklyMastery)}%</Text>
         <Text style={styles.statsLabel}>Weekly Mastery</Text>
         <Text style={styles.statsSubtext}>
-          You're outperforming 92% of users this week. Keep the momentum.
+          {"You're outperforming 92% of users this week. Keep the momentum."}
         </Text>
       </View>
 
@@ -170,13 +172,13 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   statusLabel: {
-    fontSize: 9,
+    fontSize: 11,
     fontWeight: "700",
     color: "#666",
     letterSpacing: 0.5,
   },
   cardCount: {
-    fontSize: 12,
+    fontSize: 13,
     color: "#999",
     fontWeight: "500",
   },
@@ -186,7 +188,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   deckDescription: {
-    fontSize: 12,
+    fontSize: 13,
     color: "#666",
     lineHeight: 16,
     marginBottom: 16,
@@ -200,7 +202,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   label: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: "600",
     color: "#999",
     letterSpacing: 0.5,

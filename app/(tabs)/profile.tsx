@@ -1,29 +1,32 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import {
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useTabSwipe } from "../../components/useTabSwipe";
 
 interface StatItem {
   label: string;
   value: string;
   icon: string;
+  color: string;
 }
 
 const STATS: StatItem[] = [
-  { label: "Current Streak", value: "12 days", icon: "flame" },
-  { label: "Total Cards Mastered", value: "1,234", icon: "checkmark-circle" },
-  { label: "Study Hours", value: "48.5h", icon: "time" },
-  { label: "Accuracy Rate", value: "87%", icon: "ribbon" },
+  { label: "Current Streak", value: "12 days", icon: "flame", color: "#ff5722" },
+  { label: "Total Cards Mastered", value: "1,234", icon: "checkmark-circle", color: "#4caf50" },
+  { label: "Study Hours", value: "48.5h", icon: "time", color: "#2196f3" },
+  { label: "Accuracy Rate", value: "87%", icon: "ribbon", color: "#ffb300" },
 ];
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const swipeHandlers = useTabSwipe("profile");
 
   const handleLogout = () => {
     router.replace("/auth/login");
@@ -31,14 +34,14 @@ export default function ProfileScreen() {
 
   const StatCard = ({ item }: { item: StatItem }) => (
     <View style={styles.statCard}>
-      <Ionicons name={item.icon as any} size={24} color="#000" />
+      <Ionicons name={item.icon as any} size={24} color={item.color} />
       <Text style={styles.statValue}>{item.value}</Text>
       <Text style={styles.statLabel}>{item.label}</Text>
     </View>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} {...swipeHandlers}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Profile Header */}
         <View style={styles.profileHeader}>
@@ -175,16 +178,16 @@ const styles = StyleSheet.create({
   statsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    paddingHorizontal: 8,
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
     marginVertical: 16,
   },
   statCard: {
-    width: "96%",
+    width: "47%",
     backgroundColor: "#fff",
     borderRadius: 12,
     padding: 16,
     alignItems: "center",
-    marginHorizontal: 8,
     marginBottom: 16,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -198,7 +201,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   statLabel: {
-    fontSize: 11,
+    fontSize: 12,
     color: "#999",
     marginTop: 4,
     textAlign: "center",
@@ -243,7 +246,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   settingDescription: {
-    fontSize: 12,
+    fontSize: 13,
     color: "#999",
   },
   logoutButton: {

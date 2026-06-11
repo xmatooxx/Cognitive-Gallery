@@ -3,7 +3,6 @@ import { useRouter } from "expo-router";
 import { useContext, useState } from "react";
 import {
   FlatList,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -11,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Card, DeckContext } from "../../../components/DeckContext";
 
 export default function AddCardsScreen() {
@@ -192,13 +192,7 @@ export default function AddCardsScreen() {
         >
           <Text style={styles.doneButtonText}>Done</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.gridButton}
-          onPress={() => {}}
-          activeOpacity={0.8}
-        >
-          <Ionicons name="grid" size={20} color="#fff" />
-        </TouchableOpacity>
+
       </View>
     </SafeAreaView>
   );
@@ -226,7 +220,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   cardCount: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "600",
     color: "#4caf50",
   },
@@ -240,7 +234,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   sectionTitle: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: "700",
     color: "#999",
     letterSpacing: 0.5,
@@ -258,7 +252,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   label: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "600",
     color: "#000",
   },
@@ -307,7 +301,7 @@ const styles = StyleSheet.create({
     color: "#000",
   },
   viewAllText: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "600",
     color: "#4caf50",
   },
@@ -332,7 +326,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   cardDefinition: {
-    fontSize: 12,
+    fontSize: 13,
     color: "#999",
     lineHeight: 16,
   },
